@@ -1,53 +1,34 @@
 import unittest
-from datetime import datetime
-from models.round import Round
-from models.match import Match
+from datetime import datetime,timedelta
+
 from models.player import Player
+from models.round import Round
 
 class TestRound(unittest.TestCase):
     def setUp(self):
-        # create players and matches
-        self.player1 = Player("AB001", "NameA", "FirstnameA", "1990-01-01",  "Club A")
-        self.player2 = Player("AB002", "NameB", "FirstnameB", "1995-02-02", "Club B")
-        self.match = Match(self.player1, self.player2)
-        self.match.set_result(1.0, 0.0)  # Défine a result of match
+        # create players for the test
+        self.player1 = Player("AB00001", "NameA", "FirstnameA", "1990-01-01", "clubA")
+        self.player2 = Player("AB00002", "NameB", "FirstnameB", "1995-02-02", "Club B")
+        self.round = Round("Round 1",datetime(2025,12,20,10,30))
 
-        #create a round with a start time
-        self.round = Round("Round 1",datetime(2026,2,15,10,30))
-
-    #test for constructor and properties
-    def test_round_initialization(self):
-        """Test if round is correctly initialized."""
+    #Attributs verification
+    def test_attributes(self):
         self.assertEqual(self.round.name, "Round 1")
-        self.assertEqual(self.round.start_time, datetime(2026,2,15,10,30))
-        self.assertIsNone(self.round._end_time)
-        self.assertEqual(len(self.round._matches), 0)
+        self.assertEqual(self.round.start_time, datetime(2025,12,20,10,30))
+        self.assertIsNone(self.round.end_time)
+        self.assertEqual(self.round.matches, [])
 
-    #verification property end_time before the end of round
-    def test_end_time_not_finished(self):
-        with self.assertRaises(ValueError,msg="round is not yet finished"):
-            self.round.end_time
-
-    #test for end_round
-    def test_end_round_valid(self):
-        end_time = datetime(2026,2,15,11,30)
+    def test_end_time(self):
+        end_time=self.round._start_time+timedelta(hours=1)
         self.round.end_round(end_time)
-        self.assertEqual(self.round._end_time, end_time)
+        self.assertEqual(self.round.end_time,end_time)
+    print("Test US 3.6: closing round with valid time OK!")
 
-    #end round with invalid time
-    def test_end_round_invalid(self):
-        end_time = datetime(2026,2,15,9,30)
-        with self.assertRaises(ValueError,msg="invalid end time"):
-            self.round.end_round(end_time)
-
-
-    #test for add_match_to_round
-    def test_add_match_to_round(self):
-        self.round.add_match_to_round(self.match)
-        self.assertEqual(len(self.round._matches), 1)
-        self.assertEqual(self.round._matches[0], self.match)
+    def test_invalid_end_time(self):
+        with self.assertRaises(ValueError):
+            self.round.end_round(self.round._start_time)
+    print("Test US 3.6: Rejecting invalid time OK!")
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,12 +1,9 @@
-from models.player import Player
-from models.tournament import Tournament
-from models.round import Round
-from models.match import Match
+from models import Player, Tournament
 from datetime import datetime, timedelta
 import random
 
 def main():
-    # creation 8 players
+    # Création de 8 joueurs
     players = [
         Player("AB12345", "NameA", "FirstnameA", "1990-01-01", "Club A"),
         Player("CD67890", "NameB", "FirstnameB", "1995-02-02", "Club B"),
@@ -15,13 +12,12 @@ def main():
         Player("IJ12345", "NameE", "FirstnameE", "1993-05-05", "Club A"),
         Player("KL67890", "NameF", "FirstnameF", "1989-06-06", "Club B"),
         Player("MN12345", "NameG", "FirstnameG", "1991-07-07", "Club C"),
-        Player("OP67890", "NameH", "FirstnameH", "1994-08-08", "Club D"),
-        Player("QR12345", "NameI", "FirstnameI", "1996-09-09", "Club A")
+        Player("OP67890", "NameH", "FirstnameH", "1994-08-08", "Club D")
     ]
 
-    # creation a tournament
+    # Création d'un tournoi
     tournament = Tournament(
-        name="Summer tournament",
+        name="Summer Tournament",
         location="Paris",
         start_date=datetime(2026, 8, 1),
         end_date=datetime(2026, 8, 7),
@@ -32,35 +28,42 @@ def main():
     for player in players:
         tournament.add_player(player)
 
-    print("Tournoi create with 8 players :")
+    print("🏆 Tournoi créé avec 8 joueurs :")
     for player in tournament._players:
         print(f"  - {player}")
 
-    # generation of round
+    # Génération des tours (2 tours pour l'exemple)
     for round_num in range(1, 3):
         print(f"\n--- Round {round_num} ---")
-        current_round = tournament.generate_next_round()
+        if round_num == 1:
+            current_round = tournament.generate_first_round()
+        else:
+            current_round = tournament.generate_next_round()
 
-        # Simulation result
+        # Simulation des résultats pour chaque match du tour
         for match in current_round._matches:
-            # random result
-            result = random.choice([(1, 0), (0.5, 0.5), (0, 1)])
+            # Résultat aléatoire
+            result = random.choice([(1.0, 0.0), (0.5, 0.5), (0.0, 1.0)])
             match.set_result(*result)
-            print(f"  Match : {match._player1.last_name} vs {match._player2.last_name} → Résultat : {result}")
+            print(f"  Match : {match._player1.last_name} vs {match._player2.last_name} → Résultat : {result} (Couleurs: {match.color_player1}/{match.color_player2})")
 
-        # end of round (1h after start)
+        # Fin du tour (1 heure après le début)
         current_round.end_round(current_round._start_time + timedelta(hours=1))
 
-    # final scores
-    print("\n scores after 2 rounds:")
+    # Affichage des scores finaux
+    print("\n Résultats finaux après 2 tours :")
     sorted_players = sorted(tournament._players, key=lambda p: p.score, reverse=True)
     for player in sorted_players:
         print(f"  {player.last_name} {player.first_name} (Score: {player.score})")
 
-    # Save the data
+    # Sauvegarde des données (exemple de dictionnaire)
     tournament_data = tournament.to_dict()
-    print(f"\n save the data : {tournament_data}")
+    print(f"\n Données du tournoi (pour sauvegarde JSON) :")
+    print(tournament_data)
+
+    # Sauvegarde du tournoi dans un fichier
+    file_path = tournament.save_to_json()
+    print(f"\n Tournoi sauvegardé dans : {file_path}")
 
 if __name__ == "__main__":
     main()
-

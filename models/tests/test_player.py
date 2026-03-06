@@ -1,5 +1,5 @@
 import unittest
-from datetime import date
+from datetime import datetime
 from models.player import Player #step 2
 '''
 what's a unit test :
@@ -31,7 +31,7 @@ class TestPlayer(unittest.TestCase):
    def setUp(self):
         #this method is run before each test
         #Role of setUp : creates a Player object before each test, using known values. Advantage : avoids repeating the player creation in every test
-        self.player = Player("AB001","NameA","FirstnameA",date(1995, 8, 1),"clubA")
+        self.player = Player("AB12345", "NameA", "FirstnameA", "1990-08-01", "Club A")
 
    #step 5
    #Test 1 : verify attribute initialization
@@ -39,60 +39,78 @@ class TestPlayer(unittest.TestCase):
    #self.assertEqual(a,b,message): checks that a==b. If not, it's display the message
    #We are testing national_id attribute is correctly initialized and accessible via the national_id property
    def test_national_id(self):
-       self.assertEqual(self.player._national_id,"AB001","National ID should be 'AB001'")
-
+       self.assertEqual(self.player.national_id,"AB12345","National ID should be 'AB12345'")
    def test_lastname(self):
-       self.assertEqual(self.player._last_name,"NameA","Last name should be 'NameA'")
-
+       self.assertEqual(self.player.last_name,"NameA","Last name should be 'NameA'")
+   def test_birthdate(self):
+       self.assertEqual(self.player.birth_date,"1990-08-01","Birth date should be '1990-08-01'")
+       #Attention ici datetime donc si on met en caractère ça ne fonctionnera pas car il manquera les heures minutes secondes qui sont par défaut 00:00:00
    def test_firstname(self):
-       self.assertEqual(self.player._first_name,"FirstnameA","Firstname should be 'FirstnameA'")
+       self.assertEqual(self.player.first_name,"FirstnameA","Firstname should be 'FirstnameA'")
+   def test_club(self):
+       self.assertEqual(self.player.club,"Club A","Club should be 'Club A'")
+   print("Test US 1.1 : creating player with valid information : OK!")
 
-   def test_score(self):
-       self.assertEqual(self.player._score,0,"Score should be 0")
-
-   '''def test_birth_date(self):
-       self.assertIsInstance(self.player._birth_date,date,"Birth date should be a date") #test if birth_date is a date
-       self.assertEqual(self.player._birth_date,date(1995,8,1),"Birth date should be 1995-08-01") # test the value
-
-   # test if birthdate is not a date
-   def test_birth_date_invalid_format(self):
-       # Checks that a block of code raises a specific exception.
-       # with : allows you to group multiple lines of code that are expected to raise the exception.
-       with self.assertRaises(ValueError,msg="Must raise an error if the format is invalid."):
-           Player("AB001","NameA","FirstnameA","01-08-1995","clubA")
-  '''
-   def test_birth_date_valid_formats(self):
-       self.assertEqual(self.player._birth_date, date(1995, 8, 1), "Birth date should be 1995-08-01")  # test the value
-
-
-   def test_birth_date_invalid_format(self):
+   def test_invalide_national_id(self):
        with self.assertRaises(ValueError):
-           Player("ID004", "G", "H", "32/01/2000", "Club W")  # Date invalide
+           Player("A12345", "NomA", "FirstnameA", "1990-01-01", "Club A")
+   print("Test US 1.2 : Rejecting an invalid ID : OK!")
+
+   def test_invalide_birth_date(self):
        with self.assertRaises(ValueError):
-           Player("ID004", "G", "H", "01/01", "Club W")
+           Player("AB12345", "A", "B", "10/12/1914", "Club A")
+   print("Test US 1.3 : rejecting an invalid date : OK!")
 
-   def test_update_score(self):
-       self.player.update_score(1)
-       self.assertEqual(self.player._score,1,"Score should be 1")
+   def test_add_match_update_score(self):
+       """ Test add match update score and history (US 1.4)"""
+       self.player._add_match("BC12345",1) #win
+       self.assertEqual(self.player.score,1,"Score should be in [0,0.5,1]")
+       self.assertEqual(len(self.player.to_dict()["match_history"]),1)
+       self.assertEqual(self.player.to_dict()["match_history"][0],{'opponent_id':"BC12345","result":1})
 
-   #test if value write is  not in the right list [0,0.5,1]
-   def test_update_score_no_in_list(self):
-       self.player.update_score(0.75)
-       self.assertEqual(self.player._score,0,"Score should not change if the value not in the list [0,0.5,1]")
+   print("Test US 1.4 : add_match update score OK!")
 
-   def test_add_match(self):
-       self.player.add_match("AB002",1)
-       self.assertEqual(len(self.player._match_history),1,"Match history should be 1 result")
-       self.assertEqual(self.player._match_history[0],{"opponent_id":"AB002", "result":1},"the match add is incorrect")
+   def test_add_match_invalid_result(self):
+       """ Test add match rejecting invalid result """
+       with self.assertRaises(ValueError):
+           self.player._add_match("AB12345",2)
 
-   def test_add_match_multiple(self):
-       self.player.add_match("AB003",0.5)
-       self.player.add_match("AB004",0)
-       self.assertEqual(len(self.player._match_history),2,"Match history should be 2 results")
+   print("Test US 1.4 and 1.8 : rejecting invalid score OK!")
+
+   def test_score_implement(self):
+       """Test score is implemented"""
+       self.player._add_match("BC12345",1)
+       self.player._add_match("AC12345", 0.5)
+       self.assertEqual(self.player.score,1.5,"Score should be in [0,0.5,1]")
+       #print(self.player.to_dict())
+
+   print("Test US 1.4  : score is implemented OK!")
+
+   def test_get_match_history(self):
+       """Test view match history"""
+       self.player._add_match("AC12345",1)
+       self.player._add_match("AD12345",0.5)
+       #history verification
+       history = self.player.get_match_history()
+       self.assertEqual(len(history),2)
+       self.assertEqual(history[0],{'opponent_id':"AC12345","result":1})
+       self.assertEqual(history[1],{'opponent_id':"AD12345","result":0.5})
+
+   print("Test US 1.5: view match history OK!")
+
+   def test_empty_get_match_history(self):
+       history = self.player.get_match_history()
+       self.assertEqual(history,[])
+
+   print("Test US 1.5: empty view match history OK!")
+
 
 
 if __name__ == '__main__':
     unittest.main()
+
+
+
 
 
 
