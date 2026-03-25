@@ -1,0 +1,18 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    cours/,
+    Spécification+technique_Développez+un+programme+logiciel+en+Python.pdf,
+    users_stories,
+    data/,
+    models/__init__.py
+include =
+    models/,
+    views/,
+    controllers/,
+    main.py
+ignore =
+    E501,
+    W503
