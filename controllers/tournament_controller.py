@@ -126,7 +126,8 @@ class TournamentController:
         selected_tournament._players.append(selected_player)  # ✅ Utilise l'objet existant
 
         # Sauvegarder le tournoi
-        selected_tournament.save_to_json(f"data/tournaments/{selected_tournament.name}.json")
+        # selected_tournament.save_to_json(f"data/tournaments/{selected_tournament.name}.json")
+        selected_tournament.save_to_json()
         print(f"Joueur {selected_player.first_name} {selected_player.last_name} ajouté au tournoi !")
 
     def generate_first_round(self):
@@ -140,7 +141,8 @@ class TournamentController:
 
         try:
             selected_tournament.generate_first_round()
-            selected_tournament.save_to_json(f"data/tournaments/{selected_tournament.name}.json")
+            # selected_tournament.save_to_json(f"data/tournaments/{selected_tournament.name}.json")
+            selected_tournament.save_to_json()
             print("Premier tour généré avec succès.")
         except ValueError as e:
             print(f"Erreur : {e}")
@@ -186,7 +188,8 @@ class TournamentController:
         selected_match._player1._add_match(selected_match._player2.national_id, selected_match._result[0], selected_match._color_player1)
         selected_match._player2._add_match(selected_match._player1.national_id, selected_match._result[1], selected_match._color_player2)
 
-        selected_tournament.save_to_json(f"data/tournaments/{selected_tournament.name}.json")
+        # selected_tournament.save_to_json(f"data/tournaments/{selected_tournament.name}.json")
+        selected_tournament.save_to_json()
         print("Résultat enregistré avec succès !")
 
     def generate_next_round(self):
@@ -213,7 +216,8 @@ class TournamentController:
 
             try:
                 selected_tournament.generate_next_round()
-                selected_tournament.save_to_json(f"data/tournaments/{selected_tournament.name}.json")
+                # selected_tournament.save_to_json(f"data/tournaments/{selected_tournament.name}.json")
+                selected_tournament.save_to_json()
                 print(f"Tour {len(selected_tournament._rounds_list)} généré avec succès.")
             except ValueError as e:
                 print(f"Erreur : {e}")
@@ -232,6 +236,7 @@ class TournamentController:
 
         # convertir les objets Player en dictionnaires pour l'affichage
         player_data = [player.to_dict() for player in selected_tournament._players]
+        # player_data=selected_tournament._players
         display_ranking(player_data)
 
     def manage_tournaments(self):

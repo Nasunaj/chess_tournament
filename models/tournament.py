@@ -167,12 +167,15 @@ class Tournament:
         for i in range(0, len(sorted_players), 2):  # We iterate through the players two by two (i = 0, 2, 4, etc.).
             player1 = sorted_players[i]  # The i-th player is taken as the first player of the match.
 
+            if player1 in paired_players:
+                continue  # if in this round player1 is already in paired_players so pass to next player
+
             # find another player for player1
             found_opponent = False
             for j in range(i + 1, len(sorted_players)):  # We look for an opponent among the remaining players (starting from i+1).
                 if sorted_players[j] not in paired_players:  # We check that the potential player (sorted_players[j]) has not already been paired in this round.
                     player2 = sorted_players[j]
-                    if not self._has_played_before(player1, player2):  # We check that player1 and player2 have not already played together in previous rounds.
+                    if player2 not in paired_players and not self._has_played_before(player1, player2):  # We check that player1 and player2 have not already played together in previous rounds.
                         match = Match(player1, player2)
                         round._matches.append(match)
                         paired_players.extend([player1, player2])  # add player1 and player2 individually
@@ -287,8 +290,8 @@ class Tournament:
                 if match_data['result']:
                     match._result = tuple(match_data["result"])
                     # upload scores and history players
-                    player1._add_match(player2.national_id, match._result[0], match._color_player1)
-                    player2._add_match(player1.national_id, match._result[1], match._color_player2)
+                    # player1._add_match(player2.national_id, match._result[0], match._color_player1)  # ici inutile sinon score double
+                    # player2._add_match(player1.national_id, match._result[1], match._color_player2)
 
                 round._matches.append(match)
             tournament._rounds_list.append(round)
