@@ -5,15 +5,22 @@ import random
 
 class Match:
     """Represents a match between two players with its result
-    (US 3.2 : recording result , US 3.3 : automatically upload scores and US 3.7 : rejecting invalid results)
+    (US 3.2 : recording result , US 3.3 : automatically upload scores and
+    US 3.7 : rejecting invalid results)
     US 3.8 : random colors (white pr black) for player1 and player2
     """
     def __init__(self, player1: Player, player2: Player):
         self._player1 = player1
         self._player2 = player2
-        self._result: Optional[Tuple[float, float]] = None  # Result undefined at creation
-        self._color_player1: str = random.choice(['white', 'black'])  # Random color for player1
-        self._color_player2: str = "black" if self._color_player1 == "white" else "white"  # opposite color for player2
+        # Result undefined at creation
+        self._result: Optional[Tuple[float, float]] = None
+        # Random color for player1
+        self._color_player1: str = random.choice(['white', 'black'])
+        # opposite color for player2
+        if self._color_player1 == "white":
+            self._color_player2 = "black"
+        else:
+            self._color_player2 = "white"
 
     def set_result(self, score_player1: float, score_player2: float) -> None:
         """
@@ -26,8 +33,10 @@ class Match:
             raise ValueError("Invalid result use (1,0),(0,1),(0.5,0.5)")
         self._result = (score_player1, score_player2)
         # update scores and add history
-        self._player1._add_match(self._player2.national_id, score_player1, self._color_player1)
-        self._player2._add_match(self._player1.national_id, score_player2, self._color_player2)
+        self._player1._add_match(self._player2.national_id, score_player1,
+                                 self._color_player1)
+        self._player2._add_match(self._player1.national_id, score_player2,
+                                 self._color_player2)
 
     @property
     def color_player1(self) -> str:

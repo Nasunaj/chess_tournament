@@ -1,5 +1,5 @@
-# Afficher les sous menus pour gérer les tournois
 def display_tournament_menu():
+    """Display the submenu to manage the tournaments"""
     print("\n-----------Gestion des tournois-----------")
     print("1. Créer un tournoi")
     print("2. Voir les tournois existants")
@@ -14,6 +14,7 @@ def display_tournament_menu():
 
 # Récupérer le choix de l'utilisateur
 def get_tournament_menu_choice():
+    """Get the user's choice from the menu"""
     return input("Choisissez une option entre 1 et 9: ")
 
 
@@ -36,7 +37,7 @@ def prompt_tournament_creation():
 
 
 def prompt_select_tournament(tournaments):
-    """Demande à l'utilisateur de sélectionner un tournoi."""
+    """Ask the user to select a tournament"""
     display_tournament_list(tournament.to_dict() for tournament in tournaments)
     try:
         choice = int(input("Saisir le numéro correspondant au tournoi : "))
@@ -50,14 +51,19 @@ def prompt_select_tournament(tournaments):
         return None
 
 
-# Liste des tournois à afficher par ordre en se basant sur les indices. Dans controller/ il faudra lire le fichier json et faire la liste tournaments
 def display_tournament_list(tournaments):
+    """List of tournaments to display in order based on indices.
+    In the controller/, you will need to read the JSON file and
+    create the tournaments list."""
     print("\n-----------Liste des tournois-----------")
-    for idx, tournament in enumerate(tournaments, 1):  # here start=1 else index start to 0
-        print(f"{idx}. Tournoi {tournament['name']} à {tournament['location']} (id: {tournament['id_tournament']})")
+    # here start=1 else index start to 0
+    for idx, tournament in enumerate(tournaments, 1):
+        print(f"{idx}. Tournoi {tournament['name']} à "
+              f"{tournament['location']} (id: {tournament['id_tournament']})")
 
 
 def display_tournament_details(tournament):
+    """Display the tournament details"""
     print(f"\n--- Détails du Tournoi : {tournament['name']} ---")
     print(f"Lieu : {tournament['location']}")
     print(f"Date de début : {tournament['start_date']}")
@@ -67,28 +73,37 @@ def display_tournament_details(tournament):
     if tournament['players']:
         print("\nListe des joueurs :")
         for player in tournament['players']:
-            print(f"- {player['first_name']} {player['last_name']} (Score : {player['score']})")
+            print(f"- {player['first_name']} {player['last_name']} (Score : "
+                  f"{player['score']})")
 
     if 'rounds_list' in tournament and tournament['rounds_list']:
         print("\nListe des tours :")
         for round in tournament['rounds_list']:
             print(f"- {round['name']} (Début : {round['start_time']})")
             for match in round['matches']:
-                player1 = f"{match['player1']} ({match.get('color_player1', '?')})"  # par defaut si la clé n'existe pas retourne '?'.
-                player2 = f"{match['player2']} ({match.get('color_player2', '?')})"
-                result = f"Résultat : {match['result']}" if match['result'] else "Non joué"
+                # By default, if the key not exist return ?.
+                player1 = (f"{match['player1']} "
+                           f"({match.get('color_player1', '?')})")
+                player2 = (f"{match['player2']} "
+                           f"({match.get('color_player2', '?')})")
+                if match['result']:
+                    result = f"Résultat : {match['result']}"
+                else:
+                    result = "Non joué"
                 print(f"  - {player1} vs {player2} ({result})")
 
 
-# Focntion pour générer un 1er tour
 def confirm_generate_first_round(tournament_name):
-    """Demander confirmation pour générer le 1er tour"""
-    return input("Générer le 1er tour pour le tournoi '{tournament_name}'? (o/n) : ").lower() == "o"
+    """Ask a confirmation to generate first round."""
+    return input("Générer le 1er tour pour le tournoi "
+                 "'{tournament_name}'? (o/n) : ").lower() == "o"
 
 
 def prompt_match_results(match):
+    """Display the match results"""
     print("Demande les résultats d'un match")
-    print("\n_____Résultat du match: {match['player1']} vs {match['player2']}_____")
+    print("\n_____Résultat du match: {match['player1']} vs "
+          "{match['player2']}_____")
     print("1. Victoire de {match['player1']}")
     print("2. Victoire de {match['player2']}")
     print("3. Match nul")
@@ -97,13 +112,14 @@ def prompt_match_results(match):
 
 
 def prompt_select_match(round):
-    """Affiche les matchs d'un tour et demande à l'utilisateur d'en sélectionner un."""
+    """Display the matchs of a round and ask user to select one."""
     print("\n--- Matchs disponibles ---")
     matches = []
     for i, match in enumerate(round._matches, start=1):
         player1 = f"{match._player1.first_name} {match._player1.last_name}"
         player2 = f"{match._player2.first_name} {match._player2.last_name}"
-        result = "Non joué" if not match._result else f"Résultat : {match._result}"
+        result = "Non joué" if not match._result else (f"Résultat : "
+                                                       f"{match._result}")
         print(f"{i}. {player1} vs {player2} ({result})")
         matches.append(match)
 
@@ -120,16 +136,22 @@ def prompt_select_match(round):
 
 
 def display_ranking(players):
-    """Afficher le classement des joueurs triés par score décroissant"""
+    """Display the ranking of the players (decreasing value score)"""
     print("\n____Classement des joueurs____")
     if not players:
         print("Aucun joueur dans le tournoi")
         return
 
-    # tri par score décroissant puis par nom
-    sorted_players = sorted(players, key=lambda p: (-p["score"], p["last_name"], p["first_name"]))  # ici -p  décroissant ne peut pas etre appliqué à un str, donc laissons pour nom et prénom l'ordre croissant.
-    print("{:<5} {:<20} {:<20} {:>10}".format("Rang", "Nom", "Prenom", "Score"))  # alignement text et nb caractères
+    # tried by first decreasing score , second increasing name
+    sorted_players = sorted(players,
+                            key=lambda p: (-p["score"], p["last_name"],
+                                           p["first_name"]))
+    # Align text et nb characters
+    print("{:<5} {:<20} {:<20} {:>10}".format("Rang", "Nom",
+                                              "Prenom", "Score"))
     print("-" * 60)
     for rank, player in enumerate(sorted_players, start=1):
-        # print("{:<5} {:<20} {:<20} {:>10.1f}".format(rank,player["first_name"], player["last_name"], player["score"])) # 1.f arrondi au dixième (1 chiffre après la virgule)
-        print("{:<5} {:<20} {:<20} {:>10}".format(rank, player["first_name"], player["last_name"], player["score"]))
+        print("{:<5} {:<20} {:<20} {:>10}".format(rank,
+                                                  player["first_name"],
+                                                  player["last_name"],
+                                                  player["score"]))

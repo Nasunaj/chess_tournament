@@ -13,6 +13,3 @@ include =
     views/,
     controllers/,
     main.py
-ignore =
-    E501,
-    W503

@@ -1,16 +1,19 @@
 import re
+import random
 from datetime import datetime  # for date without time
 from typing import List, Dict
-# Why US 1.4 is in class Player:
-# Single responsibility principe:
-# - PLayer is responsible for its own data(name,score,match history)
-# - Tournament or Round should not store a player's match history (this would violate the separation of responsibilities principle)
+'''Why US 1.4 is in class Player:
+Single responsibility principe:
+- PLayer is responsible for its own data(name,score,match history)
+- Tournament or Round should not store a player's match history
+(this would violate the separation of responsibilities principle)'''
 
 
 class Player:
     """Represents a chess player with their information and match history."""
 
-    def __init__(self, national_id: str, last_name: str, first_name: str, birth_date: str, club: str):
+    def __init__(self, national_id: str, last_name: str, first_name: str,
+                 birth_date: str, club: str):
         """Initializes a player with their private attributes
         Args :
             national_id(str) : National ID in the format AB12345
@@ -22,7 +25,9 @@ class Player:
         self._validate_national_id(national_id)  # ID validation
         self._validate_birth_date(birth_date)  # date of birth validation
 
-        # Encapsulation: Attributes are marked as 'private' with an underscore (_) to indicate they should not be accessed directly from outside.
+        '''Encapsulation: Attributes are marked as 'private' with an
+        underscore (_) to indicate they should not be accessed directly
+        from outside.'''
         self._national_id = national_id
         self._last_name = last_name
         self._first_name = first_name
@@ -34,9 +39,11 @@ class Player:
         self._match_history: List[Dict[str, float]] = []  # match history
         '''
         List[Dict] for _match_history
-        - Type: List[Dict[str, float]] means a list of dictionaries, where each dictionary has:
+        - Type: List[Dict[str, float]] means a list of dictionaries,
+        where each dictionary has:
           - A key "opponent_id" (str): Opponent's ID (e.g., "AB12345").
-          - A key "result" (float): Match result for this player (example : 1.0 for a win).
+          - A key "result" (float): Match result for this player
+          (example : 1.0 for a win).
         '''
 
     def _validate_national_id(self, national_id: str) -> None:
@@ -45,7 +52,8 @@ class Player:
             raise ValueError('National ID must be in the format AB12345')
 
     def _validate_birth_date(self, birth_date: str) -> None:
-        """Validates the date of birth in the format YYYY-MM-DD (private method)"""
+        """Validates the date of birth in the format YYYY-MM-DD
+        (private method)"""
         try:
             datetime.strptime(birth_date, '%Y-%m-%d')
         except ValueError:
@@ -82,15 +90,18 @@ class Player:
         return self._score
 
     def _update_score(self, points: float) -> None:
-        """ Private method to update the player's total score. it's call in public method add_match_history (US 1.8)"""
+        """ Private method to update the player's total score. it's call in
+        public method add_match_history (US 1.8)"""
         if points in [0, 0.5, 1]:
             self._score += points
         else:
             raise ValueError('Score must be in [0,0.5,1]')
 
     def _add_match(self, opponent_id: str, result: float, color: str) -> None:
-        """Adds a match to the history and updates the score (private method US 1.4).
-        This way, the result is only entered in the `Match` class's `set_result` method.
+        """Adds a match to the history and updates the score
+        (private method US 1.4).
+        This way, the result is only entered in the `Match` class's
+        `set_result` method.
         Args:
             opponent_id (str): National ID of the opponent (e.g., "CD67890").
             result (float): Match result for this player (0.0, 0.5, or 1.0).
@@ -98,8 +109,23 @@ class Player:
         """
         if result not in [0, 0.5, 1]:
             raise ValueError('Result must be in [0,0.5,1]')
-        self._match_history.append({'opponent_id': opponent_id, 'result': result, 'color': color})  # add a match in history
+        # add a match in history
+        self._match_history.append({'opponent_id': opponent_id,
+                                    'result': result, 'color': color})
         self._update_score(result)  # update final score
+
+    def __lt__(self, other: "Player") -> bool:
+        """Sort by descending score, then by last name and first name
+        (for tie-breakers)"""
+        if self.score != other.score:
+            return self.score > other.score
+        return random.random() < 0.5
+
+    def __eq__(self, other) -> bool:
+        """Two players are equal if they have the same national ID"""
+        if not isinstance(other, Player):
+            return False
+        return self.national_id == other.national_id
 
     def to_dict(self) -> Dict:
         """Convertit le joueur en dictionnaire pour la sérialisation."""
@@ -115,11 +141,13 @@ class Player:
 
     def __str__(self) -> str:
         """Returns a readable string representation of the player."""
-        return f"{self._first_name} {self._last_name} (ID: {self._national_id}, Score: {self._score})"
+        return (f"{self._first_name} {self._last_name} "
+                f"(ID: {self._national_id}, Score: {self._score})")
 
     def __repr__(self) -> str:
         """Returns a technical string representation of the player."""
-        return f"Player(national_id={self._national_id!r}, last_name={self._last_name!r}, score={self._score})"
+        return (f"Player(national_id={self._national_id!r}, "
+                f"last_name={self._last_name!r}, score={self._score})")
 
     # US 1.5
     def get_match_history(self) -> List[Dict[str, float]]:
@@ -131,4 +159,5 @@ class Player:
                 - "opponent_id" (str): Opponent's national ID.
                 - "result" (float): Match result (1.0, 0.5, or 0.0).
         """
-        return self._match_history.copy()  # Returns a copy to prevent external modifications
+        # Returns a copy to prevent external modifications
+        return self._match_history.copy()

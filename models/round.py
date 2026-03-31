@@ -12,7 +12,8 @@ class Round:
         """
         self._name = name
         self._start_time = start_time
-        self._end_time: Optional[datetime] = None  # To be set when the round is completed
+        # To be set when the round is completed
+        self._end_time: Optional[datetime] = None
         self._matches: List = []
 
     @property
@@ -35,7 +36,8 @@ class Round:
         """
         Marks the round as completed with an end time.
         :param end_time (datetime): End time of the round:
-        :raises ValueError: If the end time is earlier than or equal to the start time.
+        :raises ValueError: If the end time is earlier than or equal to the
+        start time.
         US 3.6: closing round with end time
         """
         if end_time <= self._start_time:
@@ -43,9 +45,11 @@ class Round:
         self._end_time = end_time
 
     def to_dict(self) -> dict:
+        end_time_iso = self._end_time.isoformat() if self._end_time else None
         return {
             "name": self._name,
-            "start_time": self._start_time.isoformat(),  # isofrmat in necessary becouse tournament is saved in .json and datetime don't work so need to convert ISO str
-            "end_time": self._end_time.isoformat() if self._end_time is not None else None,
-            "matches": [match.to_dict() for match in self._matches]  # need to convert each match to dictionary  to save injson
+            "start_time": self._start_time.isoformat(),
+            "end_time": end_time_iso,
+            # need to convert each match to dictionary  to save injson
+            "matches": [match.to_dict() for match in self._matches]
         }

@@ -128,9 +128,6 @@ include =
     views/,
     controllers/,
     main.py
-ignore =
-    E501,              # Ignore long lines
-    W5                 # Ignore warnings about binary operators
 ```
 3) Generate the html report ```flake8 --format=html --htmldir=flake8_report```
    - A flake8_report folder will be created at the root of the project.
